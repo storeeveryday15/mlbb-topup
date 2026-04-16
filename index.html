@@ -1,292 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mini MOBA Brawl – Web</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <title>Everyday Store - MLBB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
-html,body{
-  margin:0;
-  padding:0;
-  background:#020617;
-  overflow:hidden;
-  touch-action:none;
-  font-family:sans-serif;
-}
-canvas{display:block}
-
-/* UI */
-#joystick{
-  position:fixed;
-  left:20px;
-  bottom:20px;
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:rgba(255,255,255,.12);
-}
-#stick{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  background:#38bdf8;
-  position:absolute;
-  left:40px;
-  top:40px;
-}
-
-#ui{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-}
-.btn{
-  width:70px;
-  height:70px;
-  border-radius:50%;
-  border:none;
-  margin:6px;
-  font-weight:bold;
-  color:white;
-  font-size:14px;
-}
-#atk{background:#ef4444}
-#s1{background:#3b82f6}
-#s2{background:#8b5cf6}
-#ult{background:#facc15;color:black}
-
-#map{
-  position:fixed;
-  top:15px;
-  right:15px;
-  width:150px;
-  height:100px;
-  background:#020617;
-  border:2px solid #38bdf8;
-}
-</style>
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#0e1626;
+      color:white;
+    }
+    .container{
+      max-width:420px;
+      margin:auto;
+      padding:20px;
+    }
+    h1{
+      text-align:center;
+      margin-bottom:20px;
+    }
+    input, select, button{
+      width:100%;
+      padding:12px;
+      margin:8px 0;
+      border-radius:10px;
+      border:none;
+      font-size:15px;
+    }
+    button{
+      background:#2ecc71;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    .qr-box{
+      text-align:center;
+      margin-top:15px;
+    }
+    .qr-box img{
+      width:260px;
+      border-radius:12px;
+      display:none;
+    }
+    .note{
+      font-size:13px;
+      text-align:center;
+      margin-top:12px;
+      color:#f1c40f;
+    }
+    #processingBox{
+      display:none;
+      text-align:center;
+      margin-top:12px;
+    }
+    #successBox{
+      display:none;
+      text-align:center;
+      margin-top:12px;
+      color:#2ecc71;
+    }
+    .social-icons{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      margin-top:15px;
+    }
+    .social-icons img{
+      width:36px;
+    }
+  </style>
 </head>
 
 <body>
+<div class="container">
 
-<canvas id="game"></canvas>
-<div id="map"></div>
+  <h1>Everyday Store</h1>
 
-<div id="joystick"><div id="stick"></div></div>
+  <input type="text" id="playerID" placeholder="Player ID" required>
+  <input type="text" id="serverID" placeholder="Server ID" required>
+  <input type="text" id="mobile" placeholder="Mobile Number" required>
 
-<div id="ui">
-  <button class="btn" id="atk">ATK</button><br>
-  <button class="btn" id="s1">S1</button>
-  <button class="btn" id="s2">S2</button><br>
-  <button class="btn" id="ult">ULT</button>
+  <select id="pack" onchange="updateQR()" required>
+    <option value="">Select Pack</option>
+
+    <!-- SMALL -->
+    <option value="./qr-3.png">3 Diamonds - ₹8</option>
+    <option value="./qr-5.png">5 Diamonds - ₹12</option>
+    <option value="./qr-11.png">11 Diamonds - ₹23</option>
+    <option value="./qr-22.png">22 Diamonds - ₹35</option>
+
+    <!-- MEDIUM -->
+    <option value="./qr-55.png">55 Diamonds - ₹81</option>
+    <option value="./qr-86.png">86 Diamonds - ₹118</option>
+    <option value="./qr-112.png">112 Diamonds - ₹155</option>
+    <option value="./qr-172.png">172 Diamonds - ₹227</option>
+    <option value="./qr-257.png">257 Diamonds - ₹319</option>
+
+    <!-- LARGE -->
+    <option value="./qr-514.png">514 Diamonds - ₹637</option>
+    <option value="./qr-706.png">706 Diamonds - ₹855</option>
+    <option value="./qr-1050.png">1050 Diamonds - ₹1275</option>
+    <option value="./qr-1135.png">1135 Diamonds - ₹1385</option>
+    <option value="./qr-2195.png">2195 Diamonds - ₹2560</option>
+    <option value="./qr-3688.png">3688 Diamonds - ₹4475</option>
+    <option value="./qr-5532.png">5532 Diamonds - ₹6450</option>
+    <option value="./qr-9288.png">9288 Diamonds - ₹10950</option>
+
+    <!-- WEEKLY -->
+    <option value="./qr-weekly-1.png">1 Weekly Pass</option>
+    <option value="./qr-weekly-172.png">Weekly Pass + 172 Diamonds</option>
+    <option value="./qr-weekly-2.png">2 Weekly Passes</option>
+  </select>
+
+  <div class="qr-box">
+    <img id="qrImage" alt="QR Code">
+  </div>
+
+  <div class="note">⚠ QR appears automatically after selecting a pack</div>
+
+  <button onclick="sendOrder()">Order After Payment</button>
+
+  <div id="processingBox">⏳ Processing your order, please wait...</div>
+
+  <div id="successBox">
+    ✅ Order placed successfully<br>
+    <b>Order ID:</b> <span id="orderIdText"></span><br>
+    Please tap <b>SEND</b> in Gmail to confirm.
+  </div>
+
+  <div class="social-icons">
+    <a href="https://www.instagram.com/everyday_store_official" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png">
+    </a>
+    <a href="https://youtube.com/@everydaystore-d4w" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png">
+    </a>
+    <a href="https://wa.me/917679393645" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png">
+    </a>
+  </div>
+
 </div>
 
 <script>
-/* ================= SETUP ================= */
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const map = document.getElementById("map");
+function updateQR(){
+  const pack = document.getElementById("pack");
+  const qr = document.getElementById("qrImage");
 
-function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-}
-resize();
-addEventListener("resize", resize);
-
-let cam = { x:0, y:0, zoom:1.05 };
-
-/* ================= PLAYER ================= */
-const player = {
-  x:120,
-  y:canvas.height/2,
-  hp:200,
-  size:22,
-  speed:2,
-  dashTrail:[],
-  aoe:null
-};
-
-/* ================= ULTIMATE ================= */
-let ultimate = {
-  active:false,
-  timer:0,
-  radius:0
-};
-
-/* ================= MAP ================= */
-const laneY = canvas.height/2;
-const bush = {
-  x:canvas.width/2-120,
-  y:laneY-70,
-  w:240,
-  h:140
-};
-
-/* ================= ENTITIES ================= */
-let minions = [];
-
-function spawnMinion(){
-  minions.push({ x:150, y:laneY, hp:40 });
-}
-setInterval(spawnMinion, 3000);
-
-/* ================= JOYSTICK ================= */
-let joy={x:0,y:0};
-const stick=document.getElementById("stick");
-document.getElementById("joystick").ontouchmove=e=>{
-  const r=e.currentTarget.getBoundingClientRect();
-  const t=e.touches[0];
-  joy.x=t.clientX-(r.left+r.width/2);
-  joy.y=t.clientY-(r.top+r.height/2);
-  joy.x=Math.max(-40,Math.min(40,joy.x));
-  joy.y=Math.max(-40,Math.min(40,joy.y));
-  stick.style.left=40+joy.x+"px";
-  stick.style.top=40+joy.y+"px";
-};
-document.getElementById("joystick").ontouchend=()=>{
-  joy.x=joy.y=0;
-  stick.style.left="40px";
-  stick.style.top="40px";
-};
-
-/* ================= SKILLS ================= */
-document.getElementById("atk").ontouchstart=()=>{
-  minions.forEach(m=>{
-    if(Math.hypot(m.x-player.x,m.y-player.y)<60) m.hp-=10;
-  });
-};
-
-document.getElementById("s1").ontouchstart=()=>{
-  for(let i=0;i<8;i++){
-    player.dashTrail.push({x:player.x,y:player.y,life:20});
+  if(pack.value !== ""){
+    qr.src = pack.value;
+    qr.style.display = "block";
+  } else {
+    qr.style.display = "none";
   }
-  player.x += joy.x*2;
-  player.y += joy.y*2;
-};
+}
 
-document.getElementById("s2").ontouchstart=()=>{
-  player.aoe = { x:player.x, y:player.y, r:10, life:40 };
-};
+function sendOrder(){
+  const playerID = document.getElementById("playerID").value.trim();
+  const serverID = document.getElementById("serverID").value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+  const pack = document.getElementById("pack");
 
-document.getElementById("ult").ontouchstart=()=>{
-  if(ultimate.active) return;
-  ultimate.active=true;
-  ultimate.timer=120;
-  ultimate.radius=10;
-};
-
-/* ================= MINI MAP ================= */
-map.ontouchstart=e=>{
-  const r=map.getBoundingClientRect();
-  const t=e.touches[0];
-  cam.x=(t.clientX-r.left)/r.width*canvas.width-canvas.width/2;
-};
-
-/* ================= DRAW LOOP ================= */
-function draw(){
-  ctx.setTransform(cam.zoom,0,0,cam.zoom,-cam.x,-cam.y);
-  ctx.clearRect(cam.x,cam.y,canvas.width,canvas.height);
-
-  /* Grass */
-  const g=ctx.createLinearGradient(0,0,0,canvas.height);
-  g.addColorStop(0,"#14532d");
-  g.addColorStop(1,"#052e16");
-  ctx.fillStyle=g;
-  ctx.fillRect(cam.x,cam.y,canvas.width,canvas.height);
-
-  /* Lane */
-  ctx.fillStyle="#334155";
-  ctx.fillRect(0,laneY-90,canvas.width,180);
-
-  /* Bush */
-  ctx.fillStyle="rgba(34,197,94,.7)";
-  ctx.fillRect(bush.x,bush.y,bush.w,bush.h);
-
-  /* Dash trail */
-  player.dashTrail.forEach(t=>{
-    ctx.fillStyle="rgba(56,189,248,.35)";
-    ctx.beginPath();
-    ctx.arc(t.x,t.y,18,0,Math.PI*2);
-    ctx.fill();
-    t.life--;
-  });
-  player.dashTrail=player.dashTrail.filter(t=>t.life>0);
-
-  /* AOE skill */
-  if(player.aoe){
-    ctx.strokeStyle="rgba(168,85,247,.8)";
-    ctx.lineWidth=4;
-    ctx.beginPath();
-    ctx.arc(player.aoe.x,player.aoe.y,player.aoe.r,0,Math.PI*2);
-    ctx.stroke();
-    player.aoe.r+=3;
-    player.aoe.life--;
-    minions.forEach(m=>{
-      if(Math.hypot(m.x-player.aoe.x,m.y-player.aoe.y)<player.aoe.r){
-        m.hp-=0.6;
-      }
-    });
-    if(player.aoe.life<=0) player.aoe=null;
+  if(!playerID || !serverID || !mobile || !pack.value){
+    alert("Please fill all details and select a pack");
+    return;
   }
 
-  /* Ultimate cinematic */
-  if(ultimate.active){
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.fillStyle="rgba(0,0,0,.55)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+  const orderId = "ORD-" + Date.now();
+  document.getElementById("orderIdText").innerText = orderId;
+  document.getElementById("processingBox").style.display = "block";
 
-    cam.zoom=1.25;
+  const mailLink =
+    "mailto:storeeveryday26@gmail.com" +
+    "?subject=New MLBB Order" +
+    "&body=" + encodeURIComponent(
+      "Order ID: " + orderId + "\n" +
+      "Player ID: " + playerID + "\n" +
+      "Server ID: " + serverID + "\n" +
+      "Mobile: " + mobile + "\n" +
+      "Pack: " + pack.options[pack.selectedIndex].text
+    );
 
-    ctx.setTransform(cam.zoom,0,0,cam.zoom,-cam.x,-cam.y);
-    ctx.strokeStyle="rgba(250,204,21,.9)";
-    ctx.lineWidth=6;
-    ctx.beginPath();
-    ctx.arc(player.x,player.y,ultimate.radius,0,Math.PI*2);
-    ctx.stroke();
+  window.location.href = mailLink;
 
-    ultimate.radius+=6;
-    minions.forEach(m=>{
-      if(Math.hypot(m.x-player.x,m.y-player.y)<ultimate.radius){
-        m.hp-=2;
-      }
-    });
-
-    ultimate.timer--;
-    if(ultimate.timer<=0){
-      ultimate.active=false;
-      cam.zoom=1.05;
-    }
-  }
-
-  /* Minions */
-  minions.forEach(m=>{
-    m.x+=1;
-    ctx.fillStyle="#fb7185";
-    ctx.fillRect(m.x-8,m.y-8,16,16);
-  });
-  minions=minions.filter(m=>m.hp>0);
-
-  /* Player shadow */
-  ctx.fillStyle="rgba(0,0,0,.4)";
-  ctx.beginPath();
-  ctx.ellipse(player.x,player.y+18,18,6,0,0,Math.PI*2);
-  ctx.fill();
-
-  /* Player */
-  ctx.fillStyle="#38bdf8";
-  ctx.beginPath();
-  ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
-  ctx.fill();
-
-  /* Movement */
-  player.x+=joy.x*0.05*player.speed;
-  player.y+=joy.y*0.05*player.speed;
-
-  requestAnimationFrame(draw);
+  setTimeout(() => {
+    document.getElementById("processingBox").style.display = "none";
+    document.getElementById("successBox").style.display = "block";
+  }, 1200);
 }
-draw();
+
+console.log("Version 1.0.1");
 </script>
 
 </body>
